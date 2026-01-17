@@ -8,13 +8,17 @@ export const useAuthStore = create((set) => ({
     isAuth: false,
     isLoading: false,
     error: null,
+    profile: null,
+
+    getProfile: async() => {
+        const res = (await api.get("/profile"))
+        set({profile : res.data})
+    },
 
     register: async (data) => {
         try {
             set({ isLoading: true, error: null });
-
             await api.post("/auth/register", data);
-
             return true;
         } catch (error) {
             set({
@@ -44,8 +48,8 @@ export const useAuthStore = create((set) => ({
                 isAuth: true,
             });
 
-            localStorage.setItem("accessToken", res.data.accessToken);
-            localStorage.setItem("refreshToken", res.data.refreshToken);
+            localStorage.setItem("accessToken", res.data.token.accessToken);
+            localStorage.setItem("refreshToken", res.data.token.refreshToken);
 
             return true;
         } catch (error) {
@@ -62,6 +66,7 @@ export const useAuthStore = create((set) => ({
         localStorage.removeItem("refreshToken");
         set({
             user: null,
+            profile: null,
             accessToken: null,
             refreshToken: null,
             isAuth: false,
