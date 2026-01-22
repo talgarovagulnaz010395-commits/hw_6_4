@@ -1,0 +1,35 @@
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 40px;
+
+    background: linear-gradient(90deg, #0f172a, #1e3a8a);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.logo a {
+    color: #ffffff;
+    font-size: 28px;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+.menu {
+    display: flex;
+    justify-content: flex-end;
+    background: none;
+}
+
+.menu .ant-menu-item a {
+    color: #ffffff;
+    font-weight: 500;
+    transition: color 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.menu .ant-menu-item a:hover {
+    color: #ffd700;
+}

@@ -1,89 +1,113 @@
-import { useEffect, useState } from "react";
 import { useAuthStore } from "../store/authStore";
 import { useCategoryStore } from "../store/CategoryStore";
 import { useNavigate } from "react-router-dom";
-import { Space, Card, Button, List, Input, Spin, message } from "antd";
+import { Card, Button, List, Spin, message, Space, Input } from "antd";
+import { useEffect, useState } from "react";
 
 export default function Profile() {
-    const { getProfile, profile, isAuth, logout } = useAuthStore();
-    const { categories, getCategories, clearCategories, createCategory } = useCategoryStore();
-    const navigate = useNavigate();
+    const { user, logout, isLoading } = useAuthStore();
+    const { categories, getCategories, clearCategories, createCategory } =
+        useCategoryStore();
 
+    const navigate = useNavigate();
     const [newCategory, setNewCategory] = useState("");
-    const [loading, setLoading] = useState(false);
+    const [isCreating, setIsCreating] = useState(false);
 
     useEffect(() => {
-        if (isAuth) {
-            getProfile();
-            getCategories();
-        }
-    }, [isAuth]);
+        getCategories();
+    }, [getCategories]);
 
     const handleLogout = () => {
         logout();
         clearCategories();
-        navigate("/login");
         message.success("Вы вышли из аккаунта");
+        navigate("/login");
     };
 
     const handleAddCategory = async () => {
         if (!newCategory.trim()) return;
 
-        setLoading(true);
+        setIsCreating(true);
         try {
             await createCategory(newCategory);
+            await getCategories();
             message.success("Категория создана");
             setNewCategory("");
-        } catch (err) {
+        } catch {
             message.error("Ошибка при создании категории");
         } finally {
-            setLoading(false);
+            setIsCreating(false);
         }
     };
 
-    if (!isAuth) return <p>Вы не авторизованы</p>;
+    if (isLoading && !user) {
+        return <Spin tip="Загрузка профиля..." />;
+    }
 
     return (
-        <div style={{ maxWidth: 600, margin: "0 auto", padding: 20 }}>
-            <Space direction="vertical" size={20} style={{ width: "100%" }}>
+        <div
+            style={{
+                maxWidth: 600,
+                margin: "60px auto",
+                padding: 24,
+                backgroundColor: "#ffffff",
+                borderRadius: 12,
+                boxShadow: "0 10px 30px rgba(0,0,0,0.08)",
+            }}
+        >
+            <Space orientation="vertical" size={20} style={{ width: "100%" }}>
                 <Card
                     title="My Profile"
+                    style={{ borderRadius: 12 }}
                     extra={
-                        <Button type="primary" danger onClick={handleLogout}>
+                        <Button danger type="primary" onClick={handleLogout}>
                             Log out
                         </Button>
                     }
                 >
-                    {!profile ? (
-                        <Spin />
+                    {user ? (
+                        <>
+                            <p>
+                                <b>Username:</b> {user.username}
+                            </p>
+                            <p>
+                                <b>Email:</b> {user.email}
+                            </p>
+                        </>
                     ) : (
-                        <div>
-                            <p><b>Username:</b> {profile.username}</p>
-                            <p><b>Email:</b> {profile.email}</p>
-                        </div>
+                        <Spin />
                     )}
                 </Card>
 
-                <Card title="Categories">
-                    <Space style={{ marginBottom: 16 } }>
+                <Card title="Categories" style={{ borderRadius: 12 }}>
+                    <Space style={{ marginBottom: 16 }}>
                         <Input
                             placeholder="Введите название категории"
                             value={newCategory}
                             onChange={(e) => setNewCategory(e.target.value)}
                             onPressEnter={handleAddCategory}
-                            disabled={loading}
-                            style={{ width: "400px" }}
+                            disabled={isCreating}
+                            style={{ width: 400 }}
                         />
-                        <Button type="primary" onClick={handleAddCategory} loading={loading}>
+                        <Button
+                            type="primary"
+                            onClick={handleAddCategory}
+                            loading={isCreating}
+                        >
                             Add
                         </Button>
                     </Space>
-                    {!categories ? (
-                        <Spin />
+
+                    {categories.length === 0 ? (
+                        <p>Категорий нет</p>
                     ) : (
                         <List
                             dataSource={categories}
-                            renderItem={(item) => <List.Item key={item.id}>{item.title}</List.Item>}
+                            renderItem={(category) => (
+                                <List.Item key={category.id}>
+                                    {category.title}
+                                </List.Item>
+                            )}
                         />
                     )}
                 </Card>

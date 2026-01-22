@@ -15,15 +15,15 @@ export default function Register() {
         <Form
             onFinish={submit}
             style={{
-                maxWidth: "350px",
-                margin: "20px auto",
-                padding: "10px",
-                backgroundColor: "#1F2937",
-                color: "#fff",
-                borderRadius: "10px",
+                maxWidth: 380,
+                margin: "60px auto",
+                padding: 24,
+                backgroundColor: "#ffffff",
+                borderRadius: 12,
+                boxShadow: "0 10px 30px rgba(0,0,0,0.08)",
             }}
         >
-            <h2 style={{ color: "white" }}>Register</h2>
+            <h2 style={{ textAlign: "center", marginBottom: 20 }}>Register</h2>
 
             {error && <Alert type="error" message={error} showIcon />}
 

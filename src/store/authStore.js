@@ -1,75 +1,48 @@
 import { create } from "zustand";
-import { api } from "../api/axios";
+import { api } from "../api/axios.js";
 
 export const useAuthStore = create((set) => ({
     user: null,
-    accessToken: null,
-    refreshToken: null,
-    isAuth: false,
     isLoading: false,
     error: null,
-    profile: null,
-
-    getProfile: async() => {
-        const res = (await api.get("/profile"))
-        set({profile : res.data})
-    },
 
     register: async (data) => {
+        set({ isLoading: true, error: null });
         try {
-            set({ isLoading: true, error: null });
             await api.post("/auth/register", data);
+            set({ isLoading: false });
             return true;
-        } catch (error) {
+        } catch (err) {
             set({
-                error: error.response?.data?.message || "Registration failed",
+                error: err.response?.data?.message || "Register failed",
+                isLoading: false,
             });
             return false;
-        } finally {
-            set({ isLoading: false });
         }
     },
 
     login: async (data) => {
+        set({ isLoading: true, error: null });
         try {
-            set({ isLoading: true, error: null });
-
-            const res = await api.post("/auth/login", {
-                email: data.email,
-                password: data.password,
-            });
-
-            console.log("Login Response", res.data);
-
-            set({
-                user: res.data.user,
-                accessToken: res.data.accessToken,
-                refreshToken: res.data.refreshToken,
-                isAuth: true,
-            });
+            const res = await api.post("/auth/login", data);
 
             localStorage.setItem("accessToken", res.data.token.accessToken);
             localStorage.setItem("refreshToken", res.data.token.refreshToken);
 
+            set({ user: res.data.user, isLoading: false });
             return true;
-        } catch (error) {
+        } catch (err) {
             set({
-                error: error.response?.data?.message || "Login failed",
+                error: err.response?.data?.message || "Login failed",
+                isLoading: false,
             });
             return false;
-        } finally {
-            set({ isLoading: false });
         }
     },
+
     logout: () => {
         localStorage.removeItem("accessToken");
         localStorage.removeItem("refreshToken");
-        set({
-            user: null,
-            profile: null,
-            accessToken: null,
-            refreshToken: null,
-            isAuth: false,
-        });
+        set({ user: null });
     },
 }));
